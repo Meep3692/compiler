@@ -33,7 +33,7 @@ public class App {
                .add("assignment",    ":=");
         
         //List<Token> tokens = tokenizer.tokenize("1 2 3 \"hello\" \"with \\\"quotes\\\"\"");
-        List<Token> tokens = tokenizer.tokenize("{let x := 7; let y; x + y;}");
+        List<Token> tokens = tokenizer.tokenize("{let x := 7; let y; {}}");
 
         System.out.println("Tokens:");
         for (Token token : tokens) {
