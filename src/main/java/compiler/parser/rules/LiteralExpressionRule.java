@@ -2,6 +2,8 @@ package compiler.parser.rules;
 
 import java.util.List;
 
+import compiler.parser.ConsumeException;
+import compiler.parser.RuleHelper;
 import compiler.parser.node.Node;
 import compiler.tokenizer.Token;
 
@@ -14,21 +16,16 @@ public abstract class LiteralExpressionRule implements IParserRule {
     }
 
     @Override
-    public Node parse(List<Object> tokens) {
-        if(tokens.size() < 1) return null;
-        Object top = tokens.get(tokens.size() - 1);
-        if(top instanceof Token){
-            Token token = (Token)top;
-            if(token.type.equals(type)){
-                Node node = parse(token);
-                node.start = token.start;
-                node.line = token.line;
-                node.column = token.column;
-                return node;
-            } else {
-                return null;
-            }
-        }else{
+    public Node parse(List<Object> stack) {
+        try{
+            RuleHelper helper = new RuleHelper(stack, 1);
+            Token token = helper.consume(type);
+            Node node = parse(token);
+            node.start  = helper.start;
+            node.line   = helper.line;
+            node.column = helper.column;
+            return node;
+        }catch (ConsumeException e){
             return null;
         }
     }

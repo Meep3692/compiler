@@ -2,6 +2,8 @@ package compiler.parser.rules;
 
 import java.util.List;
 
+import compiler.parser.ConsumeException;
+import compiler.parser.RuleHelper;
 import compiler.parser.node.ExpressionNode;
 import compiler.parser.node.InfixExpressionNode;
 import compiler.parser.node.Node;
@@ -13,25 +15,18 @@ import compiler.tokenizer.Token;
 public class InfixExpressionRule implements IParserRule {
 
     @Override
-    public Node parse(List<Object> tokens) {
-        if(tokens.size() < 3) return null;
-        Object left = tokens.get(tokens.size() - 3);
-        Object op = tokens.get(tokens.size() - 2);
-        Object right = tokens.get(tokens.size() - 1);
-        if(left instanceof ExpressionNode && op instanceof Token && right instanceof ExpressionNode){
-            ExpressionNode leftNode = (ExpressionNode)left;
-            Token opToken = (Token)op;
-            ExpressionNode rightNode = (ExpressionNode)right;
-            if(opToken.type == "infix"){
-                Node node =  new InfixExpressionNode(leftNode, rightNode, opToken.value);
-                node.start = leftNode.start;
-                node.line = leftNode.line;
-                node.column = leftNode.column;
-                return node;
-            }else{
-                return null;
-            }
-        }else{
+    public Node parse(List<Object> stack) {
+        try{
+            RuleHelper helper = new RuleHelper(stack, 3);
+            ExpressionNode left = helper.consume(ExpressionNode.class);
+            Token op = helper.consume("infix");
+            ExpressionNode right = helper.consume(ExpressionNode.class);
+            InfixExpressionNode node = new InfixExpressionNode(left, right, op.value);
+            node.start  = helper.start;
+            node.line   = helper.line;
+            node.column = helper.column;
+            return node;
+        }catch (ConsumeException e){
             return null;
         }
     }

@@ -5,5 +5,5 @@ import java.util.List;
 import compiler.parser.node.Node;
 
 public interface IParserRule {
-    public Node parse(List<Object> tokens);
+    public Node parse(List<Object> stack);
 }

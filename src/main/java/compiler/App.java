@@ -7,7 +7,7 @@ import java.util.List;
 
 import compiler.parser.Parser;
 import compiler.parser.rules.*;
-import compiler.tokenizer.RegexTokenReader;
+import compiler.tokenizer.RegexTokenBuilder;
 import compiler.tokenizer.Token;
 import compiler.tokenizer.Tokenizer;
 import compiler.parser.node.Node;
@@ -16,37 +16,24 @@ public class App {
 
     public static void main(String[] args) {
         Tokenizer tokenizer = new Tokenizer();
-        RegexTokenReader numberReader = new RegexTokenReader("number", "[0-9]+");
-        tokenizer.addTokenReader(numberReader);
-        RegexTokenReader whitespaceReader = new RegexTokenReader("whitespace", "[ \t\n\r]+");
-        tokenizer.addTokenReader(whitespaceReader);
-        RegexTokenReader stringLiteralReader = new RegexTokenReader("string", "\"(?:[^\"\\\\]|\\\\\"|\\\\)*\"");
-        tokenizer.addTokenReader(stringLiteralReader);
-        RegexTokenReader infixTokenReader = new RegexTokenReader("infix", "\\+|-|\\*|/");
-        tokenizer.addTokenReader(infixTokenReader);
-        RegexTokenReader identifierTokenReader = new RegexTokenReader("identifier", "[a-zA-Z_][a-zA-Z0-9_]*");
-        tokenizer.addTokenReader(identifierTokenReader);
-        RegexTokenReader openParenTokenReader = new RegexTokenReader("open-paren", "\\(");
-        tokenizer.addTokenReader(openParenTokenReader);
-        RegexTokenReader closeParenTokenReader = new RegexTokenReader("close-paren", "\\)");
-        tokenizer.addTokenReader(closeParenTokenReader);
-        RegexTokenReader openBraceTokenReader = new RegexTokenReader("open-brace", "\\{");
-        tokenizer.addTokenReader(openBraceTokenReader);
-        RegexTokenReader closeBraceTokenReader = new RegexTokenReader("close-brace", "\\}");
-        tokenizer.addTokenReader(closeBraceTokenReader);
-        RegexTokenReader openBracketTokenReader = new RegexTokenReader("open-bracket", "\\[");
-        tokenizer.addTokenReader(openBracketTokenReader);
-        RegexTokenReader closeBracketTokenReader = new RegexTokenReader("close-bracket", "\\]");
-        tokenizer.addTokenReader(closeBracketTokenReader);
-        RegexTokenReader commaTokenReader = new RegexTokenReader("comma", ",");
-        tokenizer.addTokenReader(commaTokenReader);
-        RegexTokenReader semicolonTokenReader = new RegexTokenReader("semicolon", ";");
-        tokenizer.addTokenReader(semicolonTokenReader);
-        RegexTokenReader assignmentTokenReader = new RegexTokenReader("assignment", ":=");
-        tokenizer.addTokenReader(assignmentTokenReader);
+        RegexTokenBuilder builder = new RegexTokenBuilder(tokenizer);
+        builder.add("number",        "[0-9]+")
+               .add("whitespace",    "[ \t\n\r]+")
+               .add("string",        "\"(?:[^\"\\\\]|\\\\\"|\\\\)*\"")
+               .add("infix",         "\\+|-|\\*|/")
+               .add("identifier",    "[a-zA-Z_][a-zA-Z0-9_]*")
+               .add("open-paren",    "\\(")
+               .add("close-paren",   "\\)")
+               .add("open-brace",    "\\{")
+               .add("close-brace",   "\\}")
+               .add("open-bracket",  "\\[")
+               .add("close-bracket", "\\]")
+               .add("comma",         ",")
+               .add("semicolon",     ";")
+               .add("assignment",    ":=");
         
         //List<Token> tokens = tokenizer.tokenize("1 2 3 \"hello\" \"with \\\"quotes\\\"\"");
-        List<Token> tokens = tokenizer.tokenize("1 + 2 + 3 + \"hello\" + \"with \\\"quotes\\\"\"");
+        List<Token> tokens = tokenizer.tokenize("{let x := 7; let y; x + y;}");
 
         System.out.println("Tokens:");
         for (Token token : tokens) {
@@ -58,6 +45,9 @@ public class App {
         parser.addRule(new InfixExpressionRule());
         parser.addRule(new WhitespaceRule());
         parser.addRule(new StringExpressionRule());
+        parser.addRule(new DeclarationRule());
+        parser.addRule(new DeclarationWithAssignmentRule());
+        parser.addRule(new BlockRule());
         Node root = parser.parse(tokens);
         System.out.println("Parse Tree:\n" + root.toString());
         System.out.println("S-Expression:\n" + root.toSExp());

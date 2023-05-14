@@ -4,20 +4,20 @@ import java.util.List;
 
 import compiler.parser.ConsumeException;
 import compiler.parser.RuleHelper;
-import compiler.parser.node.DeclarationNode;
+import compiler.parser.node.ExpressionNode;
 import compiler.parser.node.Node;
-import compiler.tokenizer.Token;
+import compiler.parser.node.StatementNode;
 
-public class DeclarationRule implements IParserRule{
+public class ExpressionStatementRule implements IParserRule {
 
     @Override
     public Node parse(List<Object> stack) {
         try{
-            RuleHelper helper = new RuleHelper(stack, 3);
-            helper.consume("identifier");
-            Token identifier = helper.consume("identifier");
+            RuleHelper helper = new RuleHelper(stack, 2);
+            ExpressionNode expression =  helper.consume(ExpressionNode.class);
             helper.consume("semicolon");
-            DeclarationNode node = new DeclarationNode(helper.getConsumed(), identifier.value, null);
+            Node node = new StatementNode(expression.value, 2);
+            node.children.add(expression);
             node.start  = helper.start;
             node.line   = helper.line;
             node.column = helper.column;
